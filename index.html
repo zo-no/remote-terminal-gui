@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Remote Terminal</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  font-family: -apple-system, sans-serif;
+}
+
+/* 顶部命令按钮 */
+#cmdbar {
+  background: #252525;
+  border-bottom: 1px solid #333;
+  padding: 6px 8px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+}
+#cmdbar::-webkit-scrollbar { display: none; }
+
+.cmd-btn {
+  background: #333;
+  color: #ddd;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.cmd-btn.green { background: #1a3a22; border-color: #2d6e3e; color: #5dde7a; }
+.cmd-btn:active { opacity: 0.7; }
+
+/* terminal iframe */
+#term-frame {
+  flex: 1;
+  border: none;
+  width: 100%;
+  min-height: 0;
+}
+
+/* 底部按键 */
+#keybar {
+  background: #252525;
+  border-top: 1px solid #333;
+  padding: 5px 8px;
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+}
+#keybar::-webkit-scrollbar { display: none; }
+
+.key-btn {
+  background: #333;
+  color: #bbb;
+  border: 1px solid #444;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  min-width: 38px;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.key-btn:active { opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<div id="cmdbar">
+  <button class="cmd-btn green" data-cmd="claude\n">claude</button>
+  <button class="cmd-btn green" data-cmd="claude --dangerously-skip-permissions\n">claude --skip</button>
+  <button class="cmd-btn" data-cmd="ls -la\n">ls</button>
+  <button class="cmd-btn" data-cmd="pwd\n">pwd</button>
+  <button class="cmd-btn" data-cmd="git status\n">git status</button>
+  <button class="cmd-btn" data-cmd="git log --oneline -10\n">git log</button>
+  <button class="cmd-btn" data-cmd="cd ~/Desktop/diary/diary\n">diary</button>
+</div>
+
+<iframe id="term-frame" src="/terminal"></iframe>
+
+<div id="keybar">
+  <button class="key-btn" data-key="\t">Tab</button>
+  <button class="key-btn" data-key="\x03">Ctrl+C</button>
+  <button class="key-btn" data-key="\x04">Ctrl+D</button>
+  <button class="key-btn" data-key="\x0c">Ctrl+L</button>
+  <button class="key-btn" data-key="\x1b">Esc</button>
+  <button class="key-btn" data-key="\x1b[A">↑</button>
+  <button class="key-btn" data-key="\x1b[B">↓</button>
+  <button class="key-btn" data-key="\x1b[C">→</button>
+  <button class="key-btn" data-key="\x1b[D">←</button>
+</div>
+
+<script>
+// iframe 加载完后，把 ttyd 的 src 改成代理路径
+const frame = document.getElementById('term-frame');
+
+// ttyd 页面加载完成后注入按键函数
+frame.onload = () => {
+  try {
+    const win = frame.contentWindow;
+    // 找到 ttyd 内部的 terminal 对象并发送数据
+    window._sendToTerm = (data) => {
+      try {
+        // ttyd 把 terminal 挂在 window.term 或 window.ttyd
+        const tw = frame.contentWindow;
+        if (tw.term && tw.term._core) {
+          tw.term._core._inputHandler._parser.parse(data);
+        }
+      } catch(e) {}
+    };
+  } catch(e) {}
+};
+
+// 通过 WebSocket 直接发送（更可靠）
+let ws = null;
+
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${proto}//${location.host}/ws`);
+  ws.binaryType = 'arraybuffer';
+  ws.onclose = () => setTimeout(connectWS, 2000);
+  ws.onerror = () => ws.close();
+}
+
+connectWS();
+
+function sendData(str) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  // ttyd 二进制协议: byte[0]=0(input), 后面是 UTF-8 数据
+  const enc = new TextEncoder().encode(str);
+  const buf = new Uint8Array(enc.length + 1);
+  buf[0] = 0;
+  buf.set(enc, 1);
+  ws.send(buf);
+}
+
+// 命令按钮：发送命令字符串
+document.querySelectorAll('.cmd-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const cmd = btn.dataset.cmd.replace(/\\n/g, '\n');
+    sendData(cmd);
+    frame.focus();
+  });
+});
+
+// 按键按钮：发送控制字符
+document.querySelectorAll('.key-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.key
+      .replace(/\\t/g, '\t')
+      .replace(/\\x03/g, '\x03')
+      .replace(/\\x04/g, '\x04')
+      .replace(/\\x0c/g, '\x0c')
+      .replace(/\\x1b/g, '\x1b');
+    sendData(key);
+    frame.focus();
+  });
+});
+</script>
+</body>
+</html>
