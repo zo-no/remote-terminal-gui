@@ -1,0 +1,18 @@
+{
+  "name": "remote-terminal-gui",
+  "version": "1.0.0",
+  "description": "带 GUI 的远程 terminal，移动端友好，含快捷按钮。 基于 remote-terminal 基础版迭代。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^8.19.0"
+  }
+}

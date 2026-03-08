@@ -4,177 +4,377 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Remote Terminal</title>
+<title>Claude Remote</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  background: #1a1a1a;
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  overflow: hidden;
-  font-family: -apple-system, sans-serif;
+:root {
+  --bg: #0d0d0d;
+  --surface: #1a1a1a;
+  --border: #2a2a2a;
+  --text: #e0e0e0;
+  --muted: #666;
+  --green: #4ade80;
+  --blue: #60a5fa;
+  --yellow: #fbbf24;
+  --red: #f87171;
 }
 
-/* 顶部命令按钮 */
-#cmdbar {
-  background: #252525;
-  border-bottom: 1px solid #333;
-  padding: 6px 8px;
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, 'PingFang SC', sans-serif;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 顶部栏 */
+#topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+#topbar-left { display: flex; align-items: center; gap: 8px; }
+
+#status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  transition: background 0.3s;
+}
+#status-dot.connected { background: var(--green); }
+#status-dot.thinking { background: var(--yellow); animation: pulse 1s infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+}
+
+#status-text { font-size: 12px; color: var(--muted); }
+
+#reset-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+#reset-btn:active { opacity: 0.6; }
+
+/* 快捷按钮 */
+#quickbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 10px;
   display: flex;
   gap: 6px;
   overflow-x: auto;
   flex-shrink: 0;
   -webkit-overflow-scrolling: touch;
 }
-#cmdbar::-webkit-scrollbar { display: none; }
+#quickbar::-webkit-scrollbar { display: none; }
 
-.cmd-btn {
-  background: #333;
-  color: #ddd;
-  border: 1px solid #444;
+.quick-btn {
+  background: var(--border);
+  color: #ccc;
+  border: none;
   border-radius: 6px;
-  padding: 6px 14px;
+  padding: 6px 12px;
   font-size: 13px;
   white-space: nowrap;
   cursor: pointer;
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
 }
-.cmd-btn.green { background: #1a3a22; border-color: #2d6e3e; color: #5dde7a; }
-.cmd-btn:active { opacity: 0.7; }
+.quick-btn:active { opacity: 0.6; }
 
-/* terminal iframe */
-#term-frame {
+/* 消息列表 */
+#messages {
   flex: 1;
-  border: none;
-  width: 100%;
-  min-height: 0;
-}
-
-/* 底部按键 */
-#keybar {
-  background: #252525;
-  border-top: 1px solid #333;
-  padding: 5px 8px;
+  overflow-y: auto;
+  padding: 12px;
   display: flex;
-  gap: 5px;
-  overflow-x: auto;
-  flex-shrink: 0;
+  flex-direction: column;
+  gap: 10px;
   -webkit-overflow-scrolling: touch;
 }
-#keybar::-webkit-scrollbar { display: none; }
 
-.key-btn {
-  background: #333;
-  color: #bbb;
-  border: 1px solid #444;
-  border-radius: 5px;
-  padding: 5px 10px;
+.msg {
+  max-width: 90%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: #1a3a5c;
+  color: #e0f0ff;
+  border-bottom-right-radius: 4px;
+}
+
+.msg.assistant {
+  align-self: flex-start;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+.msg.tool {
+  align-self: flex-start;
+  background: #1a1a2a;
+  color: #a0a0cc;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
   font-size: 12px;
-  white-space: nowrap;
+  font-family: 'Menlo', monospace;
+}
+
+.msg.system {
+  align-self: center;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+/* 输入区 */
+#inputbar {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+#input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 15px;
+  padding: 10px 14px;
+  resize: none;
+  max-height: 120px;
+  min-height: 42px;
+  line-height: 1.4;
+  font-family: inherit;
+  outline: none;
+}
+#input:focus { border-color: #3a5a8a; }
+
+#send-btn {
+  background: #1a4a8a;
+  border: none;
+  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  color: #fff;
+  font-size: 18px;
   cursor: pointer;
   flex-shrink: 0;
-  min-width: 38px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   -webkit-tap-highlight-color: transparent;
 }
-.key-btn:active { opacity: 0.7; }
+#send-btn:active { opacity: 0.7; }
+#send-btn:disabled { background: #2a2a2a; color: var(--muted); }
+
+#cancel-btn {
+  background: #4a1a1a;
+  border: none;
+  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  color: var(--red);
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+#cancel-btn.visible { display: flex; }
+#cancel-btn:active { opacity: 0.7; }
 </style>
 </head>
 <body>
 
-<div id="cmdbar">
-  <button class="cmd-btn green" data-cmd="claude\n">claude</button>
-  <button class="cmd-btn green" data-cmd="claude --dangerously-skip-permissions\n">claude --skip</button>
-  <button class="cmd-btn" data-cmd="ls -la\n">ls</button>
-  <button class="cmd-btn" data-cmd="pwd\n">pwd</button>
-  <button class="cmd-btn" data-cmd="git status\n">git status</button>
-  <button class="cmd-btn" data-cmd="git log --oneline -10\n">git log</button>
-  <button class="cmd-btn" data-cmd="cd ~/Desktop/diary/diary\n">diary</button>
+<div id="topbar">
+  <div id="topbar-left">
+    <div id="status-dot"></div>
+    <span id="status-text">连接中...</span>
+  </div>
+  <button id="reset-btn">新对话</button>
 </div>
 
-<iframe id="term-frame" src="/terminal"></iframe>
+<div id="quickbar">
+  <button class="quick-btn" data-text="你好，介绍一下你自己">打招呼</button>
+  <button class="quick-btn" data-text="ls -la">ls</button>
+  <button class="quick-btn" data-text="pwd">pwd</button>
+  <button class="quick-btn" data-text="git status">git status</button>
+  <button class="quick-btn" data-text="git log --oneline -10">git log</button>
+  <button class="quick-btn" data-text="帮我看一下当前目录有什么文件">查看目录</button>
+</div>
 
-<div id="keybar">
-  <button class="key-btn" data-key="\t">Tab</button>
-  <button class="key-btn" data-key="\x03">Ctrl+C</button>
-  <button class="key-btn" data-key="\x04">Ctrl+D</button>
-  <button class="key-btn" data-key="\x0c">Ctrl+L</button>
-  <button class="key-btn" data-key="\x1b">Esc</button>
-  <button class="key-btn" data-key="\x1b[A">↑</button>
-  <button class="key-btn" data-key="\x1b[B">↓</button>
-  <button class="key-btn" data-key="\x1b[C">→</button>
-  <button class="key-btn" data-key="\x1b[D">←</button>
+<div id="messages"></div>
+
+<div id="inputbar">
+  <textarea id="input" placeholder="输入消息..." rows="1"></textarea>
+  <button id="cancel-btn" title="取消">✕</button>
+  <button id="send-btn">↑</button>
 </div>
 
 <script>
-// iframe 加载完后，把 ttyd 的 src 改成代理路径
-const frame = document.getElementById('term-frame');
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('send-btn');
+const cancelBtn = document.getElementById('cancel-btn');
+const statusDot = document.getElementById('status-dot');
+const statusText = document.getElementById('status-text');
 
-// ttyd 页面加载完成后注入按键函数
-frame.onload = () => {
-  try {
-    const win = frame.contentWindow;
-    // 找到 ttyd 内部的 terminal 对象并发送数据
-    window._sendToTerm = (data) => {
-      try {
-        // ttyd 把 terminal 挂在 window.term 或 window.ttyd
-        const tw = frame.contentWindow;
-        if (tw.term && tw.term._core) {
-          tw.term._core._inputHandler._parser.parse(data);
-        }
-      } catch(e) {}
-    };
-  } catch(e) {}
-};
-
-// 通过 WebSocket 直接发送（更可靠）
 let ws = null;
+let isThinking = false;
+let currentAssistantEl = null;
 
-function connectWS() {
+// WebSocket
+function connect() {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
   ws = new WebSocket(`${proto}//${location.host}/ws`);
-  ws.binaryType = 'arraybuffer';
-  ws.onclose = () => setTimeout(connectWS, 2000);
+
+  ws.onopen = () => setStatus('connected', '已连接');
+
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+
+    if (msg.type === 'status') {
+      if (msg.text === 'thinking') {
+        setStatus('thinking', '思考中...');
+        setThinking(true);
+        currentAssistantEl = null; // new response starts fresh
+      } else if (msg.text === 'done') {
+        setStatus('connected', '已连接');
+        setThinking(false);
+        currentAssistantEl = null;
+      } else if (msg.text === 'error') {
+        setStatus('connected', '出错了');
+        setThinking(false);
+        addMsg('system', '⚠️ 出错了，请重试');
+      } else if (msg.text === 'cancelled') {
+        setStatus('connected', '已取消');
+        setThinking(false);
+        addMsg('system', '已取消');
+      } else if (msg.text === 'reset') {
+        messagesEl.innerHTML = '';
+        addMsg('system', '新对话已开始');
+        setStatus('connected', '已连接');
+      }
+    } else if (msg.type === 'assistant') {
+      // 流式追加到当前 assistant 气泡
+      if (!currentAssistantEl) {
+        currentAssistantEl = addMsg('assistant', '');
+      }
+      currentAssistantEl.textContent += msg.text;
+      scrollBottom();
+    } else if (msg.type === 'tool_use') {
+      addMsg('tool', `🔧 ${msg.name}\n${msg.input}`);
+    }
+  };
+
+  ws.onclose = () => {
+    setStatus('', '断开，重连中...');
+    setThinking(false);
+    setTimeout(connect, 2000);
+  };
+
   ws.onerror = () => ws.close();
 }
 
-connectWS();
-
-function sendData(str) {
-  if (!ws || ws.readyState !== WebSocket.OPEN) return;
-  // ttyd 二进制协议: byte[0]=0(input), 后面是 UTF-8 数据
-  const enc = new TextEncoder().encode(str);
-  const buf = new Uint8Array(enc.length + 1);
-  buf[0] = 0;
-  buf.set(enc, 1);
-  ws.send(buf);
+function setStatus(cls, text) {
+  statusDot.className = cls;
+  statusText.textContent = text;
 }
 
-// 命令按钮：发送命令字符串
-document.querySelectorAll('.cmd-btn').forEach(btn => {
+function setThinking(v) {
+  isThinking = v;
+  sendBtn.disabled = v;
+  cancelBtn.classList.toggle('visible', v);
+}
+
+function addMsg(role, text) {
+  const el = document.createElement('div');
+  el.className = `msg ${role}`;
+  el.textContent = text;
+  messagesEl.appendChild(el);
+  scrollBottom();
+  return el;
+}
+
+function scrollBottom() {
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text || isThinking || !ws || ws.readyState !== 1) return;
+  addMsg('user', text);
+  ws.send(JSON.stringify({ type: 'send', text }));
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+}
+
+// 发送按钮
+sendBtn.addEventListener('click', sendMessage);
+
+// 取消按钮
+cancelBtn.addEventListener('click', () => {
+  if (ws?.readyState === 1) ws.send(JSON.stringify({ type: 'cancel' }));
+});
+
+// 新对话
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (ws?.readyState === 1) ws.send(JSON.stringify({ type: 'reset' }));
+});
+
+// 快捷按钮
+document.querySelectorAll('.quick-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    const cmd = btn.dataset.cmd.replace(/\\n/g, '\n');
-    sendData(cmd);
-    frame.focus();
+    inputEl.value = btn.dataset.text;
+    sendMessage();
   });
 });
 
-// 按键按钮：发送控制字符
-document.querySelectorAll('.key-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const key = btn.dataset.key
-      .replace(/\\t/g, '\t')
-      .replace(/\\x03/g, '\x03')
-      .replace(/\\x04/g, '\x04')
-      .replace(/\\x0c/g, '\x0c')
-      .replace(/\\x1b/g, '\x1b');
-    sendData(key);
-    frame.focus();
-  });
+// Enter 发送 (Shift+Enter 换行)
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
 });
+
+// 自动调整高度
+inputEl.addEventListener('input', () => {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+});
+
+connect();
 </script>
 </body>
 </html>
