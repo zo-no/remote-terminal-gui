@@ -1,5 +1,5 @@
 #!/bin/bash
-PORT=${PORT:-8080}
+PORT=${PORT:-17700}
 
 if [ -f /tmp/remote-terminal-gui.pid ]; then
   kill $(cat /tmp/remote-terminal-gui.pid) 2>/dev/null

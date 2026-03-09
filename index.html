@@ -10,7 +10,6 @@
 :root {
   --bg: #0d0d0d;
   --surface: #1a1a1a;
-  --surface2: #222;
   --border: #2a2a2a;
   --text: #e0e0e0;
   --muted: #555;
@@ -18,6 +17,7 @@
   --blue: #60a5fa;
   --yellow: #fbbf24;
   --red: #f87171;
+  --purple: #a78bfa;
 }
 body {
   background: var(--bg);
@@ -31,262 +31,240 @@ body {
 
 /* ── 侧边栏 ── */
 #sidebar {
-  position: fixed;
-  top: 0; left: 0; bottom: 0;
-  width: 260px;
-  background: #111;
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  transform: translateX(-100%);
-  transition: transform 0.25s ease;
-  z-index: 100;
+  position: fixed; top: 0; left: 0; bottom: 0; width: 260px;
+  background: #111; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  transform: translateX(-100%); transition: transform 0.25s ease; z-index: 100;
 }
 #sidebar.open { transform: translateX(0); }
-
 #sidebar-header {
-  padding: 16px 14px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  padding: 16px 14px 10px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
 #sidebar-header span { font-size: 13px; color: var(--muted); }
 #new-session-btn {
-  background: #1a3a22;
-  border: 1px solid #2d6e3e;
-  color: var(--green);
-  border-radius: 6px;
-  padding: 5px 10px;
-  font-size: 12px;
-  cursor: pointer;
+  background: #1a3a22; border: 1px solid #2d6e3e; color: var(--green);
+  border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer;
 }
 #new-session-btn:active { opacity: 0.7; }
-
-#session-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 6px;
-}
+#session-list { flex: 1; overflow-y: auto; padding: 6px; }
 #session-list::-webkit-scrollbar { display: none; }
-
 .session-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-bottom: 2px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 10px; border-radius: 8px; cursor: pointer; margin-bottom: 2px;
 }
 .session-item:hover { background: var(--surface); }
 .session-item.active { background: #1a2a3a; }
-.session-item-name {
-  flex: 1;
-  font-size: 13px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.session-item-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .session-item-count { font-size: 11px; color: var(--muted); flex-shrink: 0; }
 .session-del-btn {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 14px;
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 4px;
-  flex-shrink: 0;
-  opacity: 0;
+  background: none; border: none; color: var(--muted); font-size: 14px;
+  cursor: pointer; padding: 2px 4px; border-radius: 4px; flex-shrink: 0; opacity: 0;
 }
 .session-item:hover .session-del-btn { opacity: 1; }
 .session-del-btn:hover { color: var(--red); }
-
 #overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 99;
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99;
 }
 #overlay.visible { display: block; }
 
 /* ── 顶部栏 ── */
 #topbar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 14px; display: flex; align-items: stretch; height: 46px; flex-shrink: 0;
 }
 #menu-btn {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 18px;
-  cursor: pointer;
-  padding: 2px 4px;
-  line-height: 1;
+  background: none; border: none; color: var(--muted); font-size: 18px;
+  cursor: pointer; padding: 0 6px 0 0; line-height: 1; flex-shrink: 0; align-self: center;
 }
 #session-title {
-  flex: 1;
-  font-size: 14px;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1; font-size: 14px; font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  align-self: center; padding: 0 8px;
 }
+#tabs { display: flex; align-items: stretch; flex-shrink: 0; }
+.tab-btn {
+  background: none; border: none; color: var(--muted); font-size: 13px;
+  cursor: pointer; padding: 0 14px; border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+}
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
 #status-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--red);
-  transition: background 0.3s;
-  flex-shrink: 0;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--red);
+  transition: background 0.3s; flex-shrink: 0; align-self: center; margin-left: 8px;
 }
 #status-dot.connected { background: var(--green); }
 #status-dot.thinking { background: var(--yellow); animation: pulse 1s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-/* ── 快捷按钮 ── */
-#quickbar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 6px 10px;
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  flex-shrink: 0;
-  -webkit-overflow-scrolling: touch;
-}
-#quickbar::-webkit-scrollbar { display: none; }
-.quick-btn {
-  background: var(--border);
-  color: #ccc;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 13px;
-  white-space: nowrap;
-  cursor: pointer;
-  flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-.quick-btn:active { opacity: 0.6; }
+/* ── 视图 ── */
+#view-chat, #view-shell { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+#view-shell { display: none; }
 
-/* ── 消息列表 ── */
+/* ── 对话 ── */
 #messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex: 1; overflow-y: auto; padding: 12px;
+  display: flex; flex-direction: column; gap: 10px;
   -webkit-overflow-scrolling: touch;
 }
 .msg {
-  max-width: 88%;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 14px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-break: break-word;
+  max-width: 88%; padding: 10px 14px; border-radius: 12px;
+  font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-word;
 }
-.msg.user {
-  align-self: flex-end;
-  background: #1a3a5c;
-  color: #e0f0ff;
-  border-bottom-right-radius: 4px;
-}
-.msg.assistant {
-  align-self: flex-start;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-bottom-left-radius: 4px;
-}
+.msg.user { align-self: flex-end; background: #1a3a5c; color: #e0f0ff; border-bottom-right-radius: 4px; }
+.msg.assistant { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
 .msg.tool {
-  align-self: flex-start;
-  background: #111;
-  color: #8888cc;
-  border: 1px solid #222244;
-  border-radius: 8px;
-  font-size: 12px;
-  font-family: 'Menlo', monospace;
-  max-width: 95%;
+  align-self: flex-start; background: #111; color: #8888cc;
+  border: 1px solid #222244; border-radius: 8px;
+  font-size: 12px; font-family: 'Menlo', monospace; max-width: 95%;
 }
-.msg.system {
-  align-self: center;
-  color: var(--muted);
-  font-size: 12px;
-  padding: 4px 8px;
-}
+.msg.system { align-self: center; color: var(--muted); font-size: 12px; padding: 4px 8px; }
 
-/* ── 输入区 ── */
+/* 思考气泡 */
+.msg.thinking {
+  align-self: flex-start; max-width: 88%;
+  border-radius: 12px; border-bottom-left-radius: 4px;
+  overflow: hidden; border: 1px solid #2a2a3a;
+}
+.thinking-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px; cursor: pointer; background: #141420;
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.thinking-header:active { opacity: 0.7; }
+.thinking-dot { width: 6px; height: 6px; border-radius: 50%; background: #7c6fcd; flex-shrink: 0; }
+.thinking-dot.pulsing { animation: pulse 1s infinite; }
+.thinking-label { font-size: 12px; color: #9988dd; flex: 1; }
+.thinking-toggle { font-size: 11px; color: var(--muted); transition: transform 0.2s; }
+.thinking-toggle.open { transform: rotate(180deg); }
+.thinking-body {
+  font-size: 12px; line-height: 1.6; color: #888;
+  white-space: pre-wrap; word-break: break-word;
+  padding: 0 12px; max-height: 0; overflow: hidden;
+  transition: max-height 0.25s ease, padding 0.25s ease;
+  background: #0f0f1a;
+}
+.thinking-body.open { max-height: 400px; padding: 10px 12px; overflow-y: auto; }
+
+/* ── 对话输入 ── */
 #inputbar {
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  padding: 10px;
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-  flex-shrink: 0;
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 10px; display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0;
 }
 #input {
-  flex: 1;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-size: 15px;
-  padding: 10px 14px;
-  resize: none;
-  max-height: 120px;
-  min-height: 42px;
-  line-height: 1.4;
-  font-family: inherit;
-  outline: none;
+  flex: 1; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-size: 15px;
+  padding: 10px 14px; resize: none; max-height: 120px; min-height: 42px;
+  line-height: 1.4; font-family: inherit; outline: none;
 }
 #input:focus { border-color: #3a5a8a; }
 #send-btn {
-  background: #1a4a8a;
-  border: none;
-  border-radius: 10px;
-  width: 42px; height: 42px;
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #1a4a8a; border: none; border-radius: 10px;
+  width: 42px; height: 42px; color: #fff; font-size: 18px; cursor: pointer;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
   -webkit-tap-highlight-color: transparent;
 }
 #send-btn:active { opacity: 0.7; }
 #send-btn:disabled { background: #222; color: var(--muted); }
 #cancel-btn {
-  background: #3a1a1a;
-  border: none;
-  border-radius: 10px;
-  width: 42px; height: 42px;
-  color: var(--red);
-  font-size: 16px;
-  cursor: pointer;
-  flex-shrink: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
+  background: #3a1a1a; border: none; border-radius: 10px;
+  width: 42px; height: 42px; color: var(--red); font-size: 16px; cursor: pointer;
+  flex-shrink: 0; display: none; align-items: center; justify-content: center;
 }
 #cancel-btn.visible { display: flex; }
 #cancel-btn:active { opacity: 0.7; }
+
+/* ── 终端：快捷按钮栏（可折叠） ── */
+#shell-quickbar-wrap { flex-shrink: 0; border-bottom: 1px solid var(--border); }
+#shell-quickbar-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px; cursor: pointer; background: var(--surface);
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+#shell-quickbar-toggle:active { opacity: 0.7; }
+#shell-quickbar-toggle-label { font-size: 12px; color: var(--muted); flex: 1; }
+#shell-quickbar-toggle-arrow { font-size: 11px; color: var(--muted); transition: transform 0.2s; }
+#shell-quickbar-toggle-arrow.open { transform: rotate(180deg); }
+#shell-quickbar {
+  display: none; flex-direction: column; gap: 10px;
+  padding: 10px 12px; background: #111; max-height: 240px; overflow-y: auto;
+}
+#shell-quickbar.open { display: flex; }
+.cmd-group { display: flex; flex-direction: column; gap: 5px; }
+.cmd-group-label {
+  font-size: 10px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.cmd-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.cmd-chip {
+  background: #1e1e1e; border: 1px solid var(--border); color: var(--text);
+  border-radius: 6px; padding: 5px 10px; font-size: 12px;
+  font-family: 'Menlo', monospace; cursor: pointer; white-space: nowrap;
+  -webkit-tap-highlight-color: transparent; transition: background 0.1s;
+}
+.cmd-chip:hover { background: #272727; border-color: #3a3a3a; }
+.cmd-chip:active { opacity: 0.6; }
+
+/* ── 终端：历史记录区 ── */
+#shell-history {
+  flex: 1; overflow-y: auto; padding: 0;
+  display: flex; flex-direction: column;
+  font-family: 'Menlo', 'Courier New', monospace;
+  font-size: 13px; line-height: 1.5;
+  -webkit-overflow-scrolling: touch;
+  background: #0a0a0a;
+}
+#shell-history::-webkit-scrollbar { width: 4px; }
+#shell-history::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.shell-entry { border-bottom: 1px solid #151515; }
+.shell-cmd-line {
+  display: flex; align-items: baseline; gap: 6px;
+  padding: 8px 12px 6px; background: #0f0f0f;
+  position: sticky; top: 0; z-index: 1;
+}
+.shell-prompt { color: var(--green); flex-shrink: 0; font-size: 12px; }
+.shell-cmd-text { color: #e0e0e0; flex: 1; word-break: break-all; }
+.shell-cmd-badge {
+  font-size: 10px; padding: 1px 6px; border-radius: 3px;
+  flex-shrink: 0; align-self: center;
+}
+.shell-cmd-badge.running { color: var(--yellow); background: #2a2a00; animation: pulse 1s infinite; }
+.shell-cmd-badge.ok { color: var(--green); background: #002a00; }
+.shell-cmd-badge.err { color: var(--red); background: #2a0000; }
+.shell-out {
+  padding: 6px 12px 10px; color: #bbb; white-space: pre-wrap;
+  word-break: break-all;
+}
+.shell-out .stderr { color: #f87171; }
+
+/* ── 终端：输入栏 ── */
+#shell-inputbar {
+  background: #0f0f0f; border-top: 1px solid var(--border);
+  padding: 8px 10px; display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+}
+#shell-prompt-label { color: var(--green); font-family: 'Menlo', monospace; font-size: 13px; flex-shrink: 0; }
+#shell-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--text); font-size: 13px; font-family: 'Menlo', monospace;
+  caret-color: var(--green);
+}
+#shell-input::placeholder { color: var(--muted); }
+#shell-run-btn {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+  flex-shrink: 0; -webkit-tap-highlight-color: transparent;
+}
+#shell-run-btn:active { opacity: 0.6; }
+#shell-clear-all-btn {
+  background: none; border: none; color: var(--muted);
+  font-size: 12px; cursor: pointer; padding: 4px 6px; flex-shrink: 0;
+}
+#shell-clear-all-btn:hover { color: var(--text); }
 </style>
 </head>
 <body>
 
-<!-- 侧边栏遮罩 -->
 <div id="overlay"></div>
 
 <!-- 侧边栏 -->
@@ -302,27 +280,83 @@ body {
 <div id="topbar">
   <button id="menu-btn">☰</button>
   <div id="session-title">加载中...</div>
+  <div id="tabs">
+    <button class="tab-btn active" data-tab="chat">对话</button>
+    <button class="tab-btn" data-tab="shell">终端</button>
+  </div>
   <div id="status-dot"></div>
 </div>
 
-<!-- 快捷按钮 -->
-<div id="quickbar">
-  <button class="quick-btn" data-text="你好，介绍一下你自己">打招呼</button>
-  <button class="quick-btn" data-text="ls -la">ls</button>
-  <button class="quick-btn" data-text="pwd">pwd</button>
-  <button class="quick-btn" data-text="git status">git status</button>
-  <button class="quick-btn" data-text="git log --oneline -10">git log</button>
-  <button class="quick-btn" data-text="帮我看一下当前目录有什么文件">查看目录</button>
+<!-- 对话视图 -->
+<div id="view-chat">
+  <div id="messages"></div>
+  <div id="inputbar">
+    <textarea id="input" placeholder="输入消息..." rows="1"></textarea>
+    <button id="cancel-btn" title="取消">✕</button>
+    <button id="send-btn">↑</button>
+  </div>
 </div>
 
-<!-- 消息 -->
-<div id="messages"></div>
+<!-- 终端视图 -->
+<div id="view-shell">
 
-<!-- 输入 -->
-<div id="inputbar">
-  <textarea id="input" placeholder="输入消息..." rows="1"></textarea>
-  <button id="cancel-btn" title="取消">✕</button>
-  <button id="send-btn">↑</button>
+  <!-- 快捷命令（折叠） -->
+  <div id="shell-quickbar-wrap">
+    <div id="shell-quickbar-toggle">
+      <span id="shell-quickbar-toggle-label">快捷命令</span>
+      <span id="shell-quickbar-toggle-arrow">▾</span>
+    </div>
+    <div id="shell-quickbar">
+      <div class="cmd-group">
+        <div class="cmd-group-label">Openclaw</div>
+        <div class="cmd-chips">
+          <span class="cmd-chip" data-cmd="openclaw doctor">doctor</span>
+          <span class="cmd-chip" data-cmd="openclaw gateway restart">gateway restart</span>
+          <span class="cmd-chip" data-cmd="openclaw gateway status">gateway status</span>
+          <span class="cmd-chip" data-cmd="openclaw list">list</span>
+          <span class="cmd-chip" data-cmd="openclaw logs">logs</span>
+        </div>
+      </div>
+      <div class="cmd-group">
+        <div class="cmd-group-label">Git</div>
+        <div class="cmd-chips">
+          <span class="cmd-chip" data-cmd="git status">status</span>
+          <span class="cmd-chip" data-cmd="git log --oneline -10">log -10</span>
+          <span class="cmd-chip" data-cmd="git diff --stat">diff --stat</span>
+          <span class="cmd-chip" data-cmd="git pull">pull</span>
+        </div>
+      </div>
+      <div class="cmd-group">
+        <div class="cmd-group-label">系统</div>
+        <div class="cmd-chips">
+          <span class="cmd-chip" data-cmd="ls -la">ls -la</span>
+          <span class="cmd-chip" data-cmd="pwd">pwd</span>
+          <span class="cmd-chip" data-cmd="ps aux | head -20">ps</span>
+          <span class="cmd-chip" data-cmd="df -h">df -h</span>
+          <span class="cmd-chip" data-cmd="free -h 2>/dev/null || vm_stat">memory</span>
+          <span class="cmd-chip" data-cmd="uptime">uptime</span>
+        </div>
+      </div>
+      <div class="cmd-group">
+        <div class="cmd-group-label">网络</div>
+        <div class="cmd-chips">
+          <span class="cmd-chip" data-cmd="curl -s ifconfig.me">public IP</span>
+          <span class="cmd-chip" data-cmd="netstat -an | grep LISTEN | head -20">ports</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 历史输出 -->
+  <div id="shell-history"></div>
+
+  <!-- 输入栏 -->
+  <div id="shell-inputbar">
+    <span id="shell-prompt-label">$</span>
+    <input id="shell-input" type="text" placeholder="输入命令..." autocomplete="off" autocorrect="off" spellcheck="false">
+    <button id="shell-clear-all-btn" title="清空">⌫</button>
+    <button id="shell-run-btn">↵</button>
+  </div>
 </div>
 
 <script>
@@ -335,29 +369,63 @@ const sessionTitle = document.getElementById('session-title');
 const sessionList = document.getElementById('session-list');
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
+const viewChat = document.getElementById('view-chat');
+const viewShell = document.getElementById('view-shell');
+const shellHistory = document.getElementById('shell-history');
+const shellInput = document.getElementById('shell-input');
 
 let ws = null;
 let isThinking = false;
 let currentAssistantEl = null;
+let currentThinkingEl = null;
 let activeSessions = [];
 let activeSessionId = null;
+let currentTab = 'chat';
+
+// 终端：当前正在运行的 entry
+let activeEntry = null;
+
+// ── Tab 切换 ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentTab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    viewChat.style.display = currentTab === 'chat' ? 'flex' : 'none';
+    viewShell.style.display = currentTab === 'shell' ? 'flex' : 'none';
+    sessionTitle.style.display = currentTab === 'chat' ? '' : 'none';
+    if (currentTab === 'shell') shellInput.focus();
+  });
+});
+
+// ── 快捷命令折叠 ──
+const quickbarToggle = document.getElementById('shell-quickbar-toggle');
+const quickbar = document.getElementById('shell-quickbar');
+const quickbarArrow = document.getElementById('shell-quickbar-toggle-arrow');
+quickbarToggle.addEventListener('click', () => {
+  const open = quickbar.classList.toggle('open');
+  quickbarArrow.classList.toggle('open', open);
+  quickbarToggle.querySelector('#shell-quickbar-toggle-label').textContent = open ? '快捷命令（点击收起）' : '快捷命令';
+});
+document.querySelectorAll('.cmd-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    runShell(chip.dataset.cmd);
+    // 点击后收起快捷栏
+    quickbar.classList.remove('open');
+    quickbarArrow.classList.remove('open');
+    quickbarToggle.querySelector('#shell-quickbar-toggle-label').textContent = '快捷命令';
+  });
+});
 
 // ── 侧边栏 ──
 document.getElementById('menu-btn').addEventListener('click', () => {
-  sidebar.classList.add('open');
-  overlay.classList.add('visible');
+  sidebar.classList.add('open'); overlay.classList.add('visible');
 });
 overlay.addEventListener('click', closeSidebar);
-function closeSidebar() {
-  sidebar.classList.remove('open');
-  overlay.classList.remove('visible');
-}
-
+function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
 document.getElementById('new-session-btn').addEventListener('click', () => {
   if (ws?.readyState === 1) ws.send(JSON.stringify({ type: 'session_new' }));
   closeSidebar();
 });
-
 function renderSessions() {
   sessionList.innerHTML = '';
   for (const s of activeSessions) {
@@ -366,14 +434,11 @@ function renderSessions() {
     item.innerHTML = `
       <div class="session-item-name">${s.name}</div>
       <div class="session-item-count">${s.messageCount > 0 ? s.messageCount + '条' : ''}</div>
-      <button class="session-del-btn" data-id="${s.id}" title="删除">✕</button>
+      <button class="session-del-btn" data-id="${s.id}">✕</button>
     `;
     item.addEventListener('click', (e) => {
       if (e.target.classList.contains('session-del-btn')) {
-        const id = e.target.dataset.id;
-        if (confirm('删除此会话？')) {
-          ws.send(JSON.stringify({ type: 'session_delete', sessionId: id }));
-        }
+        if (confirm('删除此会话？')) ws.send(JSON.stringify({ type: 'session_delete', sessionId: e.target.dataset.id }));
         return;
       }
       ws.send(JSON.stringify({ type: 'session_switch', sessionId: s.id }));
@@ -383,131 +448,177 @@ function renderSessions() {
   }
 }
 
-// ── 消息 ──
+// ── 对话消息 ──
 function addMsg(role, text) {
   const el = document.createElement('div');
   el.className = `msg ${role}`;
   el.textContent = text;
   messagesEl.appendChild(el);
-  scrollBottom();
+  messagesEl.scrollTop = messagesEl.scrollHeight;
   return el;
 }
-
-function scrollBottom() {
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-function setStatus(cls, text) {
-  statusDot.className = cls;
-}
-
+function setStatus(cls) { statusDot.className = cls; }
 function setThinking(v) {
-  isThinking = v;
-  sendBtn.disabled = v;
+  isThinking = v; sendBtn.disabled = v;
   cancelBtn.classList.toggle('visible', v);
-  if (!v) currentAssistantEl = null;
-}
-
-function loadHistory(history) {
-  messagesEl.innerHTML = '';
-  for (const h of history) {
-    addMsg(h.role, h.text);
+  if (!v) {
+    currentAssistantEl = null;
+    if (currentThinkingEl) {
+      currentThinkingEl.querySelector('.thinking-dot').classList.remove('pulsing');
+      const chars = currentThinkingEl.querySelector('.thinking-body').textContent.length;
+      currentThinkingEl.querySelector('.thinking-label').textContent = `思考完成（${chars} 字）`;
+      currentThinkingEl = null;
+    }
   }
 }
+function getOrCreateThinkingEl() {
+  if (currentThinkingEl) return currentThinkingEl;
+  const el = document.createElement('div');
+  el.className = 'msg thinking';
+  el.innerHTML = `
+    <div class="thinking-header">
+      <div class="thinking-dot pulsing"></div>
+      <div class="thinking-label">思考中...</div>
+      <div class="thinking-toggle">▾</div>
+    </div>
+    <div class="thinking-body"></div>
+  `;
+  const body = el.querySelector('.thinking-body');
+  const toggle = el.querySelector('.thinking-toggle');
+  el.querySelector('.thinking-header').addEventListener('click', () => {
+    const open = body.classList.toggle('open');
+    toggle.classList.toggle('open', open);
+  });
+  messagesEl.appendChild(el);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  currentThinkingEl = el;
+  return el;
+}
+function loadHistory(history) {
+  messagesEl.innerHTML = '';
+  for (const h of history) addMsg(h.role, h.text);
+}
+
+// ── 终端：历史记录 ──
+function createEntry(cmd) {
+  const entry = document.createElement('div');
+  entry.className = 'shell-entry';
+  entry.innerHTML = `
+    <div class="shell-cmd-line">
+      <span class="shell-prompt">$</span>
+      <span class="shell-cmd-text">${escHtml(cmd)}</span>
+      <span class="shell-cmd-badge running">运行中</span>
+    </div>
+    <div class="shell-out"></div>
+  `;
+  shellHistory.appendChild(entry);
+  shellHistory.scrollTop = shellHistory.scrollHeight;
+  return entry;
+}
+function appendOutput(entry, text, isStderr) {
+  const out = entry.querySelector('.shell-out');
+  const span = document.createElement('span');
+  if (isStderr) span.className = 'stderr';
+  span.textContent = text;
+  out.appendChild(span);
+  shellHistory.scrollTop = shellHistory.scrollHeight;
+}
+function finishEntry(entry, code) {
+  const badge = entry.querySelector('.shell-cmd-badge');
+  if (code === 0 || code === null) {
+    badge.textContent = '✓'; badge.className = 'shell-cmd-badge ok';
+  } else {
+    badge.textContent = `✗ ${code}`; badge.className = 'shell-cmd-badge err';
+  }
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function runShell(cmd) {
+  if (!cmd || !ws || ws.readyState !== 1) return;
+  activeEntry = createEntry(cmd);
+  ws.send(JSON.stringify({ type: 'shell', cmd }));
+}
+
+// 输入栏
+document.getElementById('shell-run-btn').addEventListener('click', () => {
+  const cmd = shellInput.value.trim();
+  if (cmd) { runShell(cmd); shellInput.value = ''; }
+});
+shellInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const cmd = shellInput.value.trim();
+    if (cmd) { runShell(cmd); shellInput.value = ''; }
+  }
+});
+document.getElementById('shell-clear-all-btn').addEventListener('click', () => {
+  shellHistory.innerHTML = ''; activeEntry = null;
+});
 
 // ── WebSocket ──
 function connect() {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  ws = new WebSocket(`${proto}//${location.host}/ws`);
-
-  ws.onopen = () => setStatus('connected', '已连接');
-
+  const token = new URLSearchParams(location.search).get('token');
+  if (!token) { addMsg('system', '❌ 缺少 token 参数'); return; }
+  ws = new WebSocket(`${proto}//${location.host}/ws?token=${token}`);
+  ws.onopen = () => setStatus('connected');
   ws.onmessage = (e) => {
     const msg = JSON.parse(e.data);
-
     if (msg.type === 'init') {
-      activeSessions = msg.sessions;
-      activeSessionId = msg.activeId;
+      activeSessions = msg.sessions; activeSessionId = msg.activeId;
       renderSessions();
       const s = activeSessions.find(s => s.id === activeSessionId);
       if (s) sessionTitle.textContent = s.name;
-      setStatus('connected', '已连接');
-      return;
+      setStatus('connected'); return;
     }
-
     if (msg.type === 'sessions_updated') {
-      activeSessions = msg.sessions;
-      activeSessionId = msg.activeId;
+      activeSessions = msg.sessions; activeSessionId = msg.activeId;
       renderSessions();
       const s = activeSessions.find(s => s.id === activeSessionId);
-      if (s) sessionTitle.textContent = s.name;
-      return;
+      if (s) sessionTitle.textContent = s.name; return;
     }
-
     if (msg.type === 'session_switched') {
       activeSessionId = msg.sessionId;
       const s = activeSessions.find(s => s.id === activeSessionId);
       if (s) sessionTitle.textContent = s.name;
-      setThinking(false);
-      loadHistory(msg.history || []);
-      renderSessions();
-      return;
+      setThinking(false); loadHistory(msg.history || []); renderSessions(); return;
     }
-
     if (msg.type === 'status') {
-      if (msg.text === 'thinking') { setStatus('thinking'); setThinking(true); currentAssistantEl = null; }
+      if (msg.text === 'thinking') { setStatus('thinking'); setThinking(true); currentAssistantEl = null; currentThinkingEl = null; }
       else if (msg.text === 'done') { setStatus('connected'); setThinking(false); }
       else if (msg.text === 'error') { setStatus('connected'); setThinking(false); addMsg('system', '⚠️ 出错了，请重试'); }
       else if (msg.text === 'cancelled') { setStatus('connected'); setThinking(false); addMsg('system', '已取消'); }
       return;
     }
-
+    if (msg.type === 'thinking') {
+      const el = getOrCreateThinkingEl();
+      el.querySelector('.thinking-body').textContent += msg.text;
+      messagesEl.scrollTop = messagesEl.scrollHeight; return;
+    }
     if (msg.type === 'assistant') {
       if (!currentAssistantEl) currentAssistantEl = addMsg('assistant', '');
       currentAssistantEl.textContent += msg.text;
-      scrollBottom();
-      return;
+      messagesEl.scrollTop = messagesEl.scrollHeight; return;
     }
-
-    if (msg.type === 'tool_use') {
-      addMsg('tool', `🔧 ${msg.name}\n${msg.input}`);
-      return;
-    }
+    if (msg.type === 'tool_use') { addMsg('tool', `🔧 ${msg.name}\n${msg.input}`); return; }
+    if (msg.type === 'shell_out') { if (activeEntry) appendOutput(activeEntry, msg.data, msg.stderr); return; }
+    if (msg.type === 'shell_done') { if (activeEntry) { finishEntry(activeEntry, msg.code); activeEntry = null; } return; }
   };
-
-  ws.onclose = () => {
-    setStatus('', '断开');
-    setThinking(false);
-    setTimeout(connect, 2000);
-  };
+  ws.onclose = () => { setStatus(''); setThinking(false); setTimeout(connect, 2000); };
   ws.onerror = () => ws.close();
 }
 
-// ── 发送 ──
+// ── 对话发送 ──
 function sendMessage() {
   const text = inputEl.value.trim();
   if (!text || isThinking || !ws || ws.readyState !== 1) return;
   addMsg('user', text);
   ws.send(JSON.stringify({ type: 'send', text }));
-  inputEl.value = '';
-  inputEl.style.height = 'auto';
+  inputEl.value = ''; inputEl.style.height = 'auto';
 }
-
 sendBtn.addEventListener('click', sendMessage);
-cancelBtn.addEventListener('click', () => {
-  if (ws?.readyState === 1) ws.send(JSON.stringify({ type: 'cancel' }));
-});
-
-document.querySelectorAll('.quick-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    inputEl.value = btn.dataset.text;
-    sendMessage();
-  });
-});
-
-inputEl.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-});
+cancelBtn.addEventListener('click', () => { if (ws?.readyState === 1) ws.send(JSON.stringify({ type: 'cancel' })); });
+inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 inputEl.addEventListener('input', () => {
   inputEl.style.height = 'auto';
   inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';

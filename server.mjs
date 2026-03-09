@@ -11,6 +11,13 @@ import { randomBytes } from 'crypto';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = parseInt(process.env.PORT || 8080);
 const WORK_DIR = process.env.WORK_DIR || process.env.HOME;
+const TOKEN = process.env.TOKEN;
+
+if (!TOKEN) {
+  console.error('[server] TOKEN 环境变量未设置');
+  process.exit(1);
+}
+console.log(`[server] token: ${TOKEN}`);
 
 function resolveClaude() {
   const home = process.env.HOME || '';
@@ -47,7 +54,8 @@ function sessionSummary(s) {
 
 // ── HTTP ──────────────────────────────────────────────────────────────────
 const httpServer = http.createServer((req, res) => {
-  if (req.url === '/' || req.url === '/index.html') {
+  const url = new URL(req.url, 'http://localhost');
+  if (url.pathname === '/' || url.pathname === '/index.html') {
     const html = readFileSync(join(__dirname, 'index.html'), 'utf8');
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
     return res.end(html);
@@ -59,7 +67,8 @@ const httpServer = http.createServer((req, res) => {
 const wss = new WebSocketServer({ noServer: true });
 
 httpServer.on('upgrade', (req, socket, head) => {
-  if (new URL(req.url, 'http://localhost').pathname === '/ws') {
+  const url = new URL(req.url, 'http://localhost');
+  if (url.pathname === '/ws' && url.searchParams.get('token') === TOKEN) {
     wss.handleUpgrade(req, socket, head, ws => wss.emit('connection', ws));
   } else { socket.destroy(); }
 });
@@ -170,7 +179,9 @@ wss.on('connection', (ws) => {
         switch (obj.type) {
           case 'assistant':
             for (const block of (obj.message?.content || [])) {
-              if (block.type === 'text' && block.text) {
+              if (block.type === 'thinking' && block.thinking) {
+                send({ type: 'thinking', text: block.thinking });
+              } else if (block.type === 'text' && block.text) {
                 assistantText += block.text;
                 send({ type: 'assistant', text: block.text });
               } else if (block.type === 'tool_use') {
@@ -203,6 +214,22 @@ wss.on('connection', (ws) => {
       const session = sessions.get(activeSessionId);
       if (session?.proc) { try { session.proc.kill('SIGTERM'); } catch {} session.proc = null; }
       send({ type: 'status', text: 'cancelled' });
+      return;
+    }
+
+    // ── 执行 shell 命令 ──
+    if (msg.type === 'shell') {
+      const cmd = (msg.cmd || '').trim();
+      if (!cmd) return;
+      const shellId = randomBytes(4).toString('hex');
+      send({ type: 'shell_start', shellId, cmd });
+
+      const proc = spawn('bash', ['-c', cmd], { cwd: WORK_DIR, env: process.env });
+
+      proc.stdout.on('data', d => send({ type: 'shell_out', shellId, data: d.toString() }));
+      proc.stderr.on('data', d => send({ type: 'shell_out', shellId, data: d.toString(), stderr: true }));
+      proc.on('exit', (code) => send({ type: 'shell_done', shellId, code }));
+      proc.on('error', (err) => send({ type: 'shell_done', shellId, code: -1, error: err.message }));
       return;
     }
   });

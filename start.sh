@@ -3,9 +3,10 @@
 # 依赖: cloudflared, node
 # macOS: brew install cloudflared
 
-PORT=${PORT:-8080}
+PORT=${PORT:-17700}
 WORK_DIR=${WORK_DIR:-$HOME}
 DIR="$(cd "$(dirname "$0")" && pwd)"
+TOKEN=$(openssl rand -hex 8)
 
 for cmd in cloudflared node; do
   if ! command -v $cmd &>/dev/null; then
@@ -21,9 +22,20 @@ pkill -f "cloudflared tunnel --url http://127.0.0.1:$PORT" 2>/dev/null
 sleep 1
 
 echo "启动 GUI server (port $PORT)..."
-PORT=$PORT WORK_DIR="$WORK_DIR" node "$DIR/server.mjs" > /tmp/remote-terminal-gui.log 2>&1 &
+PORT=$PORT WORK_DIR="$WORK_DIR" TOKEN=$TOKEN node "$DIR/server.mjs" > /tmp/remote-terminal-gui.log 2>&1 &
 GUI_PID=$!
-sleep 1
+
+# 等待 server 监听端口（最多 5 秒）
+for i in $(seq 1 10); do
+  lsof -ti :$PORT &>/dev/null && break
+  sleep 0.5
+done
+if ! lsof -ti :$PORT &>/dev/null; then
+  echo "Server 启动失败，查看日志: /tmp/remote-terminal-gui.log"
+  tail -5 /tmp/remote-terminal-gui.log
+  kill $GUI_PID 2>/dev/null
+  exit 1
+fi
 
 echo "启动 Cloudflare 隧道..."
 TUNNEL_LOG=/tmp/remote-terminal-gui-tunnel.log
@@ -50,7 +62,7 @@ echo "======================================"
 echo "  Claude Remote 已就绪"
 echo "======================================"
 echo ""
-echo "  $URL"
+echo "$URL?token=$TOKEN"
 echo ""
-echo "  停止: ./stop.sh"
+echo "停止: ./stop.sh"
 echo "======================================"
