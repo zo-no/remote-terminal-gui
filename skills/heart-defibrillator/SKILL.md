@@ -7,9 +7,9 @@ allowed-tools: Bash
 
 执行 `$ARGUMENTS` 操作（默认为 start）。
 
-项目根目录：
+项目根目录（skill 目录即项目目录）：
 ```bash
-PROJECT_DIR="/Users/kual/code/remote-terminal-gui/heart-defibrillator"
+PROJECT_DIR="${CLAUDE_SKILL_DIR}"
 ```
 
 ## start（启动）
@@ -18,7 +18,8 @@ PROJECT_DIR="/Users/kual/code/remote-terminal-gui/heart-defibrillator"
 
 ```bash
 if ! command -v cloudflared &>/dev/null; then
-  echo "缺少 cloudflared"
+  echo "缺少 cloudflared，请先安装"
+  echo "macOS: brew install cloudflared"
   exit 1
 fi
 ```
@@ -37,8 +38,7 @@ fi
 ### 3. 启动服务
 
 ```bash
-PROJECT_DIR="/Users/kual/code/remote-terminal-gui/heart-defibrillator"
-bash "$PROJECT_DIR/start.sh"
+bash "${CLAUDE_SKILL_DIR}/start.sh"
 ```
 
 成功后提取完整 URL 告知用户：
@@ -52,8 +52,7 @@ bash "$PROJECT_DIR/start.sh"
 ## stop（停止）
 
 ```bash
-PROJECT_DIR="/Users/kual/code/remote-terminal-gui/heart-defibrillator"
-bash "$PROJECT_DIR/stop.sh"
+bash "${CLAUDE_SKILL_DIR}/stop.sh"
 ```
 
 ## 快捷命令

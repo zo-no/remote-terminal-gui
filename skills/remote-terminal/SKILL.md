@@ -7,9 +7,9 @@ allowed-tools: Bash
 
 执行 `$ARGUMENTS` 操作（默认为 start）。
 
-项目根目录（含 `start.sh` / `server.mjs` / `index.html`）：
+项目根目录（skill 目录即项目目录）：
 ```bash
-PROJECT_DIR="/Users/kual/code/remote-terminal-gui"
+PROJECT_DIR="${CLAUDE_SKILL_DIR}"
 ```
 
 ## start（启动）
@@ -17,7 +17,7 @@ PROJECT_DIR="/Users/kual/code/remote-terminal-gui"
 ### 1. 安装依赖（首次使用）
 
 ```bash
-PROJECT_DIR="/Users/kual/code/remote-terminal-gui"
+PROJECT_DIR="${CLAUDE_SKILL_DIR}"
 
 # 安装 npm 依赖
 [ ! -d "$PROJECT_DIR/node_modules" ] && cd "$PROJECT_DIR" && npm install
@@ -48,8 +48,7 @@ fi
 ### 3. 启动服务
 
 ```bash
-PROJECT_DIR="/Users/kual/code/remote-terminal-gui"
-bash "$PROJECT_DIR/start.sh"
+bash "${CLAUDE_SKILL_DIR}/start.sh"
 ```
 
 成功时输出包含完整访问链接（含 token）。如果报"Server 启动失败"，查看 `/tmp/remote-terminal-gui.log`。
@@ -68,8 +67,7 @@ bash "$PROJECT_DIR/start.sh"
 ## stop（停止）
 
 ```bash
-PROJECT_DIR="/Users/kual/code/remote-terminal-gui"
-bash "$PROJECT_DIR/stop.sh"
+bash "${CLAUDE_SKILL_DIR}/stop.sh"
 ```
 
 ## 依赖
