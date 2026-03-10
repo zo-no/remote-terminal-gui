@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>北京天气 🌤️</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f5f7; --surface: #fff; --border: #e5e5e5;
+  --text: #1d1d1f; --muted: #86868b; --accent: #0071e3;
+  --radius: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0d0d; --surface: #1c1c1e; --border: #38383a;
+    --text: #f5f5f7; --muted: #98989d; --accent: #0a84ff;
+  }
+}
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, 'PingFang SC', 'SF Pro', sans-serif;
+  min-height: 100dvh; padding: 0;
+}
+.container { max-width: 520px; margin: 0 auto; padding: 24px 16px 40px; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+.subtitle { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+.today {
+  background: linear-gradient(135deg, #0071e3, #34c759);
+  border-radius: var(--radius); padding: 24px; color: #fff; margin-bottom: 20px;
+}
+.today .temp { font-size: 56px; font-weight: 200; }
+.today .desc { font-size: 18px; opacity: 0.9; margin-top: 4px; }
+.today .detail { font-size: 13px; opacity: 0.7; margin-top: 8px; }
+.forecast { display: flex; flex-direction: column; gap: 8px; }
+.day-card {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); border-radius: var(--radius); padding: 16px 18px;
+  border: 1px solid var(--border);
+}
+.day-card .date { font-size: 14px; font-weight: 600; min-width: 100px; }
+.day-card .weekday { font-size: 12px; color: var(--muted); }
+.day-card .weather-icon { font-size: 28px; min-width: 40px; text-align: center; }
+.day-card .desc-text { font-size: 13px; color: var(--muted); min-width: 70px; }
+.day-card .temps { text-align: right; }
+.day-card .temps .high { font-size: 16px; font-weight: 600; }
+.day-card .temps .low { font-size: 13px; color: var(--muted); }
+.chart-section { margin: 24px 0; }
+.chart-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+canvas { width: 100%; height: 200px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); }
+.powered { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>北京天气 🌤️</h1>
+  <div class="subtitle">2026年3月10日 — 3月14日</div>
+
+  <div class="today">
+    <div class="temp">12°</div>
+    <div class="desc">☀️ 晴</div>
+    <div class="detail">1° / 12° · 南风转北风 · 微风</div>
+  </div>
+
+  <div class="chart-section">
+    <div class="chart-title">温度趋势</div>
+    <canvas id="tempChart"></canvas>
+  </div>
+
+  <div class="forecast">
+    <div class="day-card">
+      <div><div class="date">3月10日</div><div class="weekday">周二 · 今天</div></div>
+      <div class="weather-icon">☀️</div>
+      <div class="desc-text">晴</div>
+      <div class="temps"><div class="high">12°</div><div class="low">1°</div></div>
+    </div>
+    <div class="day-card">
+      <div><div class="date">3月11日</div><div class="weekday">周三</div></div>
+      <div class="weather-icon">☀️</div>
+      <div class="desc-text">晴</div>
+      <div class="temps"><div class="high">15°</div><div class="low">0°</div></div>
+    </div>
+    <div class="day-card">
+      <div><div class="date">3月12日</div><div class="weekday">周四</div></div>
+      <div class="weather-icon">⛅</div>
+      <div class="desc-text">晴转多云</div>
+      <div class="temps"><div class="high">12°</div><div class="low">1°</div></div>
+    </div>
+    <div class="day-card">
+      <div><div class="date">3月13日</div><div class="weekday">周五</div></div>
+      <div class="weather-icon">🌧️</div>
+      <div class="desc-text">小雨</div>
+      <div class="temps"><div class="high">9°</div><div class="low">1°</div></div>
+    </div>
+    <div class="day-card">
+      <div><div class="date">3月14日</div><div class="weekday">周六</div></div>
+      <div class="weather-icon">🌤️</div>
+      <div class="desc-text">多云转晴</div>
+      <div class="temps"><div class="high">10°</div><div class="low">-1°</div></div>
+    </div>
+  </div>
+
+  <div class="powered">Powered by CatClaw 🦘</div>
+</div>
+
+<script>
+const canvas = document.getElementById('tempChart');
+const ctx = canvas.getContext('2d');
+const dpr = window.devicePixelRatio || 1;
+canvas.width = canvas.offsetWidth * dpr;
+canvas.height = 200 * dpr;
+ctx.scale(dpr, dpr);
+const W = canvas.offsetWidth, H = 200;
+
+const days = ['3/10', '3/11', '3/12', '3/13', '3/14'];
+const highs = [12, 15, 12, 9, 10];
+const lows = [1, 0, 1, 1, -1];
+const minT = -3, maxT = 18;
+
+function tY(t) { return H - 40 - ((t - minT) / (maxT - minT)) * (H - 80); }
+function dX(i) { return 40 + i * ((W - 80) / (days.length - 1)); }
+
+ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#e5e5e5';
+ctx.lineWidth = 0.5;
+for (let t = 0; t <= 15; t += 5) {
+  const y = tY(t);
+  ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(W - 10, y); ctx.stroke();
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#86868b';
+  ctx.font = '11px -apple-system';
+  ctx.fillText(t + '°', 4, y + 4);
+}
+
+ctx.strokeStyle = '#ff3b30'; ctx.lineWidth = 2.5;
+ctx.beginPath();
+days.forEach((_, i) => { i === 0 ? ctx.moveTo(dX(i), tY(highs[i])) : ctx.lineTo(dX(i), tY(highs[i])); });
+ctx.stroke();
+
+ctx.strokeStyle = '#007aff'; ctx.lineWidth = 2.5;
+ctx.beginPath();
+days.forEach((_, i) => { i === 0 ? ctx.moveTo(dX(i), tY(lows[i])) : ctx.lineTo(dX(i), tY(lows[i])); });
+ctx.stroke();
+
+days.forEach((d, i) => {
+  ctx.fillStyle = '#ff3b30';
+  ctx.beginPath(); ctx.arc(dX(i), tY(highs[i]), 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#1d1d1f';
+  ctx.font = 'bold 12px -apple-system';
+  ctx.fillText(highs[i] + '°', dX(i) - 10, tY(highs[i]) - 10);
+
+  ctx.fillStyle = '#007aff';
+  ctx.beginPath(); ctx.arc(dX(i), tY(lows[i]), 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#1d1d1f';
+  ctx.font = '12px -apple-system';
+  ctx.fillText(lows[i] + '°', dX(i) - 10, tY(lows[i]) + 20);
+
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#86868b';
+  ctx.font = '11px -apple-system';
+  ctx.fillText(d, dX(i) - 12, H - 10);
+});
+
+ctx.font = '11px -apple-system';
+ctx.fillStyle = '#ff3b30'; ctx.fillText('● 最高', W - 100, 16);
+ctx.fillStyle = '#007aff'; ctx.fillText('● 最低', W - 50, 16);
+</script>
+</body>
+</html>
