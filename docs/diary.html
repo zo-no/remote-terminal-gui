@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>今日日记 📝</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f5f7; --surface: #fff; --border: #e5e5e5;
+  --text: #1d1d1f; --muted: #86868b; --accent: #0071e3;
+  --radius: 16px; --success: #34c759;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0d0d; --surface: #1c1c1e; --border: #38383a;
+    --text: #f5f5f7; --muted: #98989d; --accent: #0a84ff;
+    --success: #30d158;
+  }
+}
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, 'PingFang SC', 'SF Pro', sans-serif;
+  min-height: 100dvh;
+}
+.container { max-width: 520px; margin: 0 auto; padding: 24px 16px 60px; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+.subtitle { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+
+.form-group { margin-bottom: 20px; }
+label {
+  display: block; font-size: 14px; font-weight: 600;
+  margin-bottom: 8px; color: var(--text);
+}
+
+textarea, select {
+  width: 100%; padding: 12px 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; font-size: 16px; color: var(--text);
+  font-family: inherit; outline: none; transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+textarea:focus, select:focus { border-color: var(--accent); }
+textarea { min-height: 120px; resize: vertical; line-height: 1.6; }
+
+.mood-selector { display: flex; gap: 8px; flex-wrap: wrap; }
+.mood-btn {
+  padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--surface); font-size: 16px; cursor: pointer; transition: all 0.2s;
+}
+.mood-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+.energy-bar { display: flex; gap: 4px; align-items: center; }
+.energy-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--border); cursor: pointer;
+  transition: all 0.2s; display: flex; align-items: center;
+  justify-content: center; font-size: 12px;
+}
+.energy-dot.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+.energy-label { font-size: 12px; color: var(--muted); margin-left: 8px; }
+
+.submit-btn {
+  width: 100%; padding: 16px; border: none; border-radius: 14px;
+  background: var(--accent); color: #fff; font-size: 17px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.2s; margin-top: 8px;
+}
+.submit-btn:hover { opacity: 0.9; }
+
+/* 结果页 */
+.result { text-align: center; padding: 40px 20px; }
+.result .icon { font-size: 64px; margin-bottom: 16px; }
+.result h2 { font-size: 22px; margin-bottom: 12px; }
+.result p { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+
+.code-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; text-align: left;
+  font-family: 'SF Mono', monospace; font-size: 12px;
+  word-break: break-all; max-height: 200px; overflow-y: auto;
+  margin-bottom: 16px; line-height: 1.5; color: var(--muted);
+  user-select: all;
+}
+
+.copy-btn {
+  width: 100%; padding: 14px; border: none; border-radius: 14px;
+  background: var(--success); color: #fff; font-size: 16px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.copy-btn:hover { opacity: 0.9; }
+.copy-btn.copied { background: var(--muted); }
+
+.powered { text-align: center; color: var(--muted); font-size: 12px; margin-top: 32px; }
+.step-hint {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; margin-top: 16px;
+}
+.step-hint p { font-size: 14px; color: var(--text); margin-bottom: 8px; }
+.step-hint .step { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>今日日记 📝</h1>
+  <div class="subtitle" id="dateLabel"></div>
+
+  <form id="diaryForm">
+    <div class="form-group">
+      <label>心情</label>
+      <div class="mood-selector" id="moodSelector">
+        <button type="button" class="mood-btn" data-mood="😊 开心">😊 开心</button>
+        <button type="button" class="mood-btn" data-mood="😌 平静">😌 平静</button>
+        <button type="button" class="mood-btn" data-mood="😤 烦躁">😤 烦躁</button>
+        <button type="button" class="mood-btn" data-mood="😢 低落">😢 低落</button>
+        <button type="button" class="mood-btn" data-mood="🤩 兴奋">🤩 兴奋</button>
+        <button type="button" class="mood-btn" data-mood="😴 疲惫">😴 疲惫</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>精力值</label>
+      <div class="energy-bar" id="energyBar">
+        <div class="energy-dot" data-val="1">1</div>
+        <div class="energy-dot" data-val="2">2</div>
+        <div class="energy-dot" data-val="3">3</div>
+        <div class="energy-dot" data-val="4">4</div>
+        <div class="energy-dot" data-val="5">5</div>
+        <div class="energy-dot" data-val="6">6</div>
+        <div class="energy-dot" data-val="7">7</div>
+        <div class="energy-dot" data-val="8">8</div>
+        <div class="energy-dot" data-val="9">9</div>
+        <div class="energy-dot" data-val="10">10</div>
+        <span class="energy-label" id="energyLabel">未选择</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>今天做了什么？</label>
+      <textarea name="work" placeholder="工作内容、完成的事情..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>生活记录</label>
+      <textarea name="life" placeholder="生活中的事、感受..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>今日收获 / 反思</label>
+      <textarea name="reflection" placeholder="学到了什么？有什么想法？" style="min-height:80px"></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn">完成 ✨</button>
+  </form>
+
+  <!-- 结果页 -->
+  <div id="resultPage" style="display:none">
+    <div class="result">
+      <div class="icon">✅</div>
+      <h2>日记已生成</h2>
+      <p>点击下方按钮复制，然后发给 CatClaw 🦘</p>
+    </div>
+
+    <div class="code-box" id="codeBox"></div>
+
+    <button class="copy-btn" id="copyBtn" onclick="copyCode()">📋 一键复制</button>
+
+    <div class="step-hint">
+      <p><span class="step">Step 1</span> 点击上方「一键复制」</p>
+      <p><span class="step">Step 2</span> 回到大象，粘贴发送给 CatClaw</p>
+      <p><span class="step">Step 3</span> 自动保存，搞定！</p>
+    </div>
+  </div>
+
+  <div class="powered">Powered by CatClaw 🦘 × Web Form</div>
+</div>
+
+<script>
+const now = new Date();
+const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+document.getElementById('dateLabel').textContent =
+  `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${['日','一','二','三','四','五','六'][now.getDay()]}`;
+
+let selectedMood = '';
+document.querySelectorAll('.mood-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedMood = btn.dataset.mood;
+  });
+});
+
+let energy = 0;
+document.querySelectorAll('.energy-dot').forEach(dot => {
+  dot.addEventListener('click', () => {
+    energy = parseInt(dot.dataset.val);
+    document.querySelectorAll('.energy-dot').forEach(d => {
+      d.classList.toggle('active', parseInt(d.dataset.val) <= energy);
+    });
+    const labels = ['','很差','差','偏低','一般','还行','不错','良好','很好','极佳','满格'];
+    document.getElementById('energyLabel').textContent = labels[energy] || '';
+  });
+});
+
+document.getElementById('diaryForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const data = {
+    _t: 'diary',
+    d: dateStr,
+    mood: selectedMood || '未选择',
+    energy: energy || 0,
+    work: fd.get('work') || '',
+    life: fd.get('life') || '',
+    ref: fd.get('reflection') || ''
+  };
+
+  // 编码为 base64（紧凑）
+  const encoded = '📝DIARY:' + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+
+  document.getElementById('diaryForm').style.display = 'none';
+  document.getElementById('resultPage').style.display = 'block';
+  document.getElementById('codeBox').textContent = encoded;
+});
+
+function copyCode() {
+  const text = document.getElementById('codeBox').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✅ 已复制！去大象粘贴发送吧';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 一键复制';
+      btn.classList.remove('copied');
+    }, 3000);
+  });
+}
+</script>
+</body>
+</html>
