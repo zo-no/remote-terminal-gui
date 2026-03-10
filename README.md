@@ -1,19 +1,28 @@
 # remote-terminal-gui
 
-远程终端服务，支持 Claude 对话和 Shell 命令执行，移动端友好。
+A collection of OpenClaw skills for exposing dynamic Web UIs via Cloudflare tunnel.
 
-## 依赖
+## Skills
 
-- node
-- cloudflared (`brew install cloudflared`)
+| Skill | Description |
+|-------|-------------|
+| `remote-terminal/` | Remote terminal access with Claude chat + shell |
+| `heart-defibrillator/` | Emergency heartbeat recovery UI |
+| `web-service-kit/` | **NEW** - Dynamic form/survey/diary Web UI generator |
 
-## 使用
+## web-service-kit (New!)
 
-```bash
-./start.sh   # 启动，输出访问链接（含 token）
-./stop.sh    # 停止
+Generate dynamic Web UIs from JSON config. Users fill forms in their browser, data returns to your agent.
+
+```
+Agent → config.json → Web server → Cloudflare tunnel → User browser → callback.json → Agent
 ```
 
-## Skill
+Features:
+- 📋 Dynamic forms from JSON
+- 🌐 Auto Cloudflare tunnel
+- 📱 Mobile-friendly dark mode UI
+- 🔒 Token-based auth
+- 🔄 WebSocket real-time
 
-通过 `/remote-terminal` 命令启动。Skill 定义在 `~/.claude/skills/remote-terminal/SKILL.md`。
+See [skills/web-service-kit/README.md](skills/web-service-kit/README.md) for details.

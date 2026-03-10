@@ -1,0 +1,14 @@
+{
+  "name": "web-service-kit",
+  "version": "1.0.0",
+  "description": "Dynamic Web UI service for AI agents - generate forms, collect user input via Cloudflare tunnel",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.19.0"
+  },
+  "license": "MIT"
+}
